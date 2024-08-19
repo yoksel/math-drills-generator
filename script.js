@@ -5,9 +5,11 @@ const opAddElement = document.getElementById('op-add');
 const opSubElement = document.getElementById('op-sub');
 const opMultElement = document.getElementById('op-mult');
 const opDivElement = document.getElementById('op-div');
+const onPageElement = document.getElementById('on-page');
 
 const MIN = 1;
 const MAX = 12;
+const PER_PAGE = 54;
 minValueElement.value = MIN;
 maxValueElement.value = MAX;
 
@@ -19,11 +21,15 @@ opAddElement.addEventListener('input', fillDrills);
 opSubElement.addEventListener('input', fillDrills);
 opMultElement.addEventListener('input', fillDrills);
 opDivElement.addEventListener('input', fillDrills);
+onPageElement.addEventListener('change', fillDrills);
 
 function fillDrills() {
   const exercisesList = [];
   const min = getValueFromInput(minValueElement.value) || MIN;
   const max = getValueFromInput(maxValueElement.value) || MAX;
+  const onPageValue = getValueFromInput(onPageElement?.value) || PER_PAGE;
+
+  drillsElement.style = `--rows: ${onPageValue / 3}`;
 
   for (let i = min; i <= max; i++) {
     for (let k = min; k < max; k++) {
@@ -59,9 +65,16 @@ function fillDrills() {
   }
 
   const listItems = shuffle(shuffle(exercisesList)).map(item => `<li>${item} = </li>`);
+  const listsByPages = [listItems.splice(0, onPageValue)];
+
+  while(listItems.length > 0) {
+    listsByPages.push(listItems.splice(0, onPageValue));
+  }
 
   drillsElement.innerHTML = '';
-  drillsElement.insertAdjacentHTML( 'beforeend', `<ol>${listItems.join('')}</ol>` )
+  listsByPages.forEach(list =>
+    drillsElement.insertAdjacentHTML( 'beforeend', `<ol>${list.join('')}</ol>` )
+  );
 }
 
 // UTILS

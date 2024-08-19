@@ -11,16 +11,20 @@ H1 {
 }
 
 OL {
-  columns: 3;
   margin: 0;
   padding: 0;
   list-style: none;
-  line-height: 2.85;
+  display: grid;
+  gap: 0 1em;
+  grid-template-columns: repeat(3, 1fr);
 }
 
 LI {
+  display: flex;
+  align-items: center;
   background-image: linear-gradient(to top, #CCC 1px, transparent 1px,transparent);
   background-size: 100% 100%;
+  min-height: 50px;
 }
 
 LABEL {
@@ -31,12 +35,27 @@ LABEL {
   margin-bottom: 30px;
 }
 
+@page {
+  size: A4 portrait;
+}
+
 @media print {
   BODY {
     padding: 0 20px;
   }
+
   .header {
     display: none;
+  }
+
+  OL {
+    width: 100%;
+    max-height: 100%;
+    page-break-after: always;
+  }
+
+  LI {
+    min-height: calc(100vh / var(--rows));
   }
 }
 
@@ -49,5 +68,5 @@ LABEL {
 .controls__group {
   display: flex;
   flex-wrap: wrap;
-  gap: .5em 1em;
+  gap: .5em 1.5em;
 }
