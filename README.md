@@ -1,1 +1,3 @@
-Simple math drills generator
+# Simple math drills generator
+
+https://yoksel.github.io/math-drills-generator/

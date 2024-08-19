@@ -13,14 +13,12 @@ maxValueElement.value = MAX;
 
 fillDrills();
 
-minValueElement.addEventListener('input', fillDrills)
-maxValueElement.addEventListener('input', fillDrills)
-opAddElement.addEventListener('input', fillDrills)
-opSubElement.addEventListener('input', fillDrills)
-opMultElement.addEventListener('input', fillDrills)
-opDivElement.addEventListener('input', fillDrills)
-
-console.dir(opSubElement.checked)
+minValueElement.addEventListener('input', fillDrills);
+maxValueElement.addEventListener('input', fillDrills);
+opAddElement.addEventListener('input', fillDrills);
+opSubElement.addEventListener('input', fillDrills);
+opMultElement.addEventListener('input', fillDrills);
+opDivElement.addEventListener('input', fillDrills);
 
 function fillDrills() {
   const exercisesList = [];
