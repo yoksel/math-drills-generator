@@ -1,35 +1,35 @@
 const drillsElement = document.getElementById( 'drills' );
-const minValueElement = document.getElementById('value-min');
-const maxValueElement = document.getElementById('value-max');
-const opAddElement = document.getElementById('op-add');
-const opSubElement = document.getElementById('op-sub');
-const opMultElement = document.getElementById('op-mult');
-const opDivElement = document.getElementById('op-div');
-const onPageElement = document.getElementById('on-page');
+const minValueElement = document.getElementById('min');
+const maxValueElement = document.getElementById('max');
+const opAddElement = document.getElementById('add');
+const opSubElement = document.getElementById('sub');
+const opMultElement = document.getElementById('mult');
+const opDivElement = document.getElementById('div');
+const perPageElement = document.getElementById('per-page');
 
 const MIN = 1;
 const MAX = 12;
 const PER_PAGE = 54;
-minValueElement.value = MIN;
-maxValueElement.value = MAX;
+const MAX_PAGES = 50;
 
+fillInputsByValuesFromUrl();
 fillDrills();
 
-minValueElement.addEventListener('input', fillDrills);
-maxValueElement.addEventListener('input', fillDrills);
-opAddElement.addEventListener('input', fillDrills);
-opSubElement.addEventListener('input', fillDrills);
-opMultElement.addEventListener('input', fillDrills);
-opDivElement.addEventListener('input', fillDrills);
-onPageElement.addEventListener('change', fillDrills);
+minValueElement.addEventListener('input', onChange);
+maxValueElement.addEventListener('input', onChange);
+opAddElement.addEventListener('input', onChange);
+opSubElement.addEventListener('input', onChange);
+opMultElement.addEventListener('input', onChange);
+opDivElement.addEventListener('input', onChange);
+perPageElement.addEventListener('change', onChange);
 
 function fillDrills() {
   const exercisesList = [];
-  const min = getValueFromInput(minValueElement.value) || MIN;
-  const max = getValueFromInput(maxValueElement.value) || MAX;
-  const onPageValue = getValueFromInput(onPageElement?.value) || PER_PAGE;
+  const min = getNumValueFromInput(minValueElement.value) || MIN;
+  const max = getNumValueFromInput(maxValueElement.value) || MAX;
+  const perPageValue = getNumValueFromInput(perPageElement?.value) || PER_PAGE;
 
-  drillsElement.style = `--rows: ${onPageValue / 3}`;
+  drillsElement.style = `--rows: ${perPageValue / 3}`;
 
   for (let i = min; i <= max; i++) {
     for (let k = min; k < max; k++) {
@@ -65,10 +65,10 @@ function fillDrills() {
   }
 
   const listItems = shuffle(shuffle(exercisesList)).map(item => `<li>${item} = </li>`);
-  const listsByPages = [listItems.splice(0, onPageValue)];
+  const listsByPages = [listItems.splice(0, perPageValue)];
 
-  while(listItems.length > 0) {
-    listsByPages.push(listItems.splice(0, onPageValue));
+  while(listItems.length > 0 && listsByPages.length < MAX_PAGES) {
+    listsByPages.push(listItems.splice(0, perPageValue));
   }
 
   drillsElement.innerHTML = '';
@@ -79,13 +79,47 @@ function fillDrills() {
 
 // UTILS
 
-function getValueFromInput(inputValue) {
-  if(isNaN(inputValue)) return;
+function onChange(event) {
+  const {id, value, type, checked} = event.target;
+  console.log(event.target, type)
+  const params = new URLSearchParams(location.search);
+  if(type === 'checkbox'){
+    params.set(id, checked)
+  }
+  else {
+    params.set(id, value)
+  }
+  location.search = params.toString();
+  // event.target
+  // Location.search
+  fillDrills();
+}
 
-  const value = parseInt(inputValue);
-  if (value <= 0) return;
+function fillInputsByValuesFromUrl() {
+  const params = new URLSearchParams(location.search);
+  const min = getNumValueFromInput(params.get('min')) ?? MIN;
+  const max = getNumValueFromInput(params.get('max')) ?? MAX;
+  const perPageFromUrl = getNumValueFromInput(params.get('per-page')) ?? PER_PAGE;
+  const perPage = perPageFromUrl > 24 ? perPageFromUrl : PER_PAGE;
 
-  return value;
+  minValueElement.value = min > max ? max : min;
+  maxValueElement.value = min > max ? min : max;
+  opAddElement.checked = getBooleanValueFromInput(params.get('add')) ?? true;
+  opSubElement.checked = getBooleanValueFromInput(params.get('sub')) ?? true;
+  opMultElement.checked = getBooleanValueFromInput(params.get('mult')) ?? true;
+  opDivElement.checked = getBooleanValueFromInput(params.get('div')) ?? true;
+
+  perPageElement.value = perPage;
+}
+
+function getNumValueFromInput(inputValue) {
+  if(isNaN(parseInt(inputValue))) return;
+
+  return parseInt(inputValue);
+}
+
+function getBooleanValueFromInput(inputValue) {
+  if(['true','false'].includes(inputValue)) return inputValue === 'true';
 }
 
 // https://stackoverflow.com/a/2450976
