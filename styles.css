@@ -19,6 +19,12 @@ OL {
   grid-template-columns: repeat(3, 1fr);
 }
 
+@media (max-width: 600px) {
+  OL {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 LI {
   display: flex;
   align-items: center;
@@ -36,7 +42,7 @@ LABEL {
 }
 
 @page {
-  size: A4 portrait;
+  size: A4;
 }
 
 @media print {
@@ -57,6 +63,11 @@ LABEL {
   LI {
     min-height: calc(100vh / var(--rows));
   }
+}
+
+.container {
+  max-width: 1200px;
+  margin: auto;
 }
 
 .controls {
