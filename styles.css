@@ -1,0 +1,44 @@
+BODY {
+  margin: 0;
+  padding: 0 40px;
+  font-family: Helvetica, Tahoma, sans-serif;
+  font-size: 20px;
+  line-height: 2.85;
+}
+
+H1 {
+  margin-bottom: 0;
+}
+
+OL {
+  columns: 3;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+LI {
+  background-image: linear-gradient(to top, #CCC 1px, transparent 1px,transparent);
+  background-size: 100% 100%;
+}
+
+.header {
+  margin-bottom: 1em;
+}
+
+@media print {
+  .header {
+    display: none;
+  }
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3em;
+}
+
+.controls__group {
+  display: flex;
+  gap: 1em;
+}
