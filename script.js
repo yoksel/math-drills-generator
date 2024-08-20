@@ -24,7 +24,7 @@ opDivElement.addEventListener('input', onChange);
 perPageElement.addEventListener('change', onChange);
 
 function fillDrills() {
-  const exercisesList = [];
+  const exercisesSet = new Set();
   const min = getNumValueFromInput(minValueElement.value) || MIN;
   const max = getNumValueFromInput(maxValueElement.value) || MAX;
   const perPageValue = getNumValueFromInput(perPageElement?.value) || PER_PAGE;
@@ -35,34 +35,37 @@ function fillDrills() {
     for (let k = min; k < max; k++) {
       // Addition
       if (opAddElement.checked === true){
-        exercisesList.push(`${i} + ${k}`);
+        exercisesSet.add(`${i} + ${k}`);
       }
       // Multiplication
       if (opMultElement.checked === true){
-        exercisesList.push( `${i} x ${k}` );
+        exercisesSet.add( `${i} x ${k}` );
       }
+      // Division
+        if(opDivElement.checked === true) {
+          exercisesSet.add( `${k * i} &#247; ${i}` );
+
+          if(k !== i) {
+            exercisesSet.add( `${k * i} &#247; ${k}` );
+          }
+        }
+
       if (k  > i) {
         // Substraction
         if (opSubElement.checked === true) {
-          exercisesList.push( `${k} &minus; ${i}` );
-        }
-        // Division
-        if(k % i === 0 && opDivElement.checked === true) {
-          exercisesList.push( `${k} &#247; ${i}` );
+          exercisesSet.add( `${k} &minus; ${i}` );
         }
       }
       else {
         // Substraction
         if (opSubElement.checked === true) {
-          exercisesList.push( `${i} &minus; ${k}` );
-        }
-        // Division
-        if (i % k === 0 && opDivElement.checked === true) {
-          exercisesList.push( `${i} &#247; ${k}` );
+          exercisesSet.add( `${i} &minus; ${k}` );
         }
       }
     }
   }
+
+  const exercisesList = Array.from(exercisesSet);
 
   const listItems = shuffle(shuffle(exercisesList)).map(item => `<li>${item} = </li>`);
   const listsByPages = [listItems.splice(0, perPageValue)];
