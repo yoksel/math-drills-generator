@@ -6,11 +6,13 @@ const opSubElement = document.getElementById('sub');
 const opMultElement = document.getElementById('mult');
 const opDivElement = document.getElementById('div');
 const perPageElement = document.getElementById('per-page');
+const randElement = document.getElementById('rand');
 
 const MIN = 1;
 const MAX = 12;
 const PER_PAGE = 54;
 const MAX_PAGES = 50;
+const MAX_ITEMS = PER_PAGE * MAX_PAGES;
 
 fillInputsByValuesFromUrl();
 fillDrills();
@@ -22,17 +24,19 @@ opSubElement.addEventListener('input', onChange);
 opMultElement.addEventListener('input', onChange);
 opDivElement.addEventListener('input', onChange);
 perPageElement.addEventListener('change', onChange);
+randElement.addEventListener('change', onChange);
 
 function fillDrills() {
   const exercisesSet = new Set();
   const min = getNumValueFromInput(minValueElement.value) || MIN;
   const max = getNumValueFromInput(maxValueElement.value) || MAX;
   const perPageValue = getNumValueFromInput(perPageElement?.value) || PER_PAGE;
+  const isRandom = randElement.checked;
 
   drillsElement.style = `--rows: ${perPageValue / 3}`;
 
   for (let i = min; i <= max; i++) {
-    for (let k = min; k < max; k++) {
+    for (let k = min; k <= max; k++) {
       // Addition
       if (opAddElement.checked === true){
         exercisesSet.add(`${i} + ${k}`);
@@ -62,12 +66,16 @@ function fillDrills() {
           exercisesSet.add( `${i} &minus; ${k}` );
         }
       }
+      if(exercisesSet.size >= MAX_ITEMS) {
+         break;
+      }
     }
   }
 
   const exercisesList = Array.from(exercisesSet);
+  const orderedItems = isRandom ? shuffle(shuffle(exercisesList)) : exercisesList
 
-  const listItems = shuffle(shuffle(exercisesList)).map(item => `<li>${item} = </li>`);
+  const listItems = orderedItems.map(item => `<li>${item} = </li>`);
   const listsByPages = [listItems.splice(0, perPageValue)];
 
   while(listItems.length > 0 && listsByPages.length < MAX_PAGES) {
@@ -84,7 +92,6 @@ function fillDrills() {
 
 function onChange(event) {
   const {id, value, type, checked} = event.target;
-  console.log(event.target, type)
   const params = new URLSearchParams(location.search);
   if(type === 'checkbox'){
     params.set(id, checked)
@@ -111,6 +118,7 @@ function fillInputsByValuesFromUrl() {
   opSubElement.checked = getBooleanValueFromInput(params.get('sub')) ?? true;
   opMultElement.checked = getBooleanValueFromInput(params.get('mult')) ?? true;
   opDivElement.checked = getBooleanValueFromInput(params.get('div')) ?? true;
+  randElement.checked = getBooleanValueFromInput(params.get('rand')) ?? true;
 
   perPageElement.value = perPage;
 }
