@@ -10,9 +10,7 @@ const randElement = document.getElementById('rand');
 
 const MIN = 1;
 const MAX = 12;
-const PER_PAGE = 54;
-const MAX_PAGES = 50;
-const MAX_ITEMS = PER_PAGE * MAX_PAGES;
+const MAX_PAGES = 500;
 
 fillInputsByValuesFromUrl();
 fillDrills();
@@ -27,61 +25,26 @@ perPageElement.addEventListener('change', onChange);
 randElement.addEventListener('change', onChange);
 
 function fillDrills() {
-  const exercisesSet = new Set();
+  console.log('--- Drills ---')
   const min = getNumValueFromInput(minValueElement.value) || MIN;
   const max = getNumValueFromInput(maxValueElement.value) || MAX;
   const perPageValue = getNumValueFromInput(perPageElement?.value) || PER_PAGE;
   const isRandom = randElement.checked;
+  const maxItems = perPageValue * MAX_PAGES;
 
-  drillsElement.style = `--rows: ${perPageValue / 3}`;
+  const drillsList = isRandom ? getDrillsByRandomOrder(min, max, maxItems) : getDrillsByNormalOrder(min, max, maxItems);
+  const listItems = drillsList.map(item => `<li>${item} = </li>`);
 
-  for (let i = min; i <= max; i++) {
-    for (let k = min; k <= max; k++) {
-      // Addition
-      if (opAddElement.checked === true){
-        exercisesSet.add(`${i} + ${k}`);
-      }
-      // Multiplication
-      if (opMultElement.checked === true){
-        exercisesSet.add( `${i} x ${k}` );
-      }
-      // Division
-        if(opDivElement.checked === true) {
-          exercisesSet.add( `${k * i} &#247; ${i}` );
-
-          if(k !== i) {
-            exercisesSet.add( `${k * i} &#247; ${k}` );
-          }
-        }
-
-      if (k  > i) {
-        // Substraction
-        if (opSubElement.checked === true) {
-          exercisesSet.add( `${k} &minus; ${i}` );
-        }
-      }
-      else {
-        // Substraction
-        if (opSubElement.checked === true) {
-          exercisesSet.add( `${i} &minus; ${k}` );
-        }
-      }
-      if(exercisesSet.size >= MAX_ITEMS) {
-         break;
-      }
-    }
-  }
-
-  const exercisesList = Array.from(exercisesSet);
-  const orderedItems = isRandom ? shuffle(shuffle(exercisesList)) : exercisesList
-
-  const listItems = orderedItems.map(item => `<li>${item} = </li>`);
   const listsByPages = [listItems.splice(0, perPageValue)];
+
 
   while(listItems.length > 0 && listsByPages.length < MAX_PAGES) {
     listsByPages.push(listItems.splice(0, perPageValue));
   }
 
+  console.log({isRandom, drills: drillsList.length, maxItems, pages: listsByPages.length})
+
+  drillsElement.style = `--rows: ${perPageValue / 3}`;
   drillsElement.innerHTML = '';
   listsByPages.forEach(list =>
     drillsElement.insertAdjacentHTML( 'beforeend', `<ol>${list.join('')}</ol>` )
@@ -99,9 +62,8 @@ function onChange(event) {
   else {
     params.set(id, value)
   }
-  location.search = params.toString();
-  // event.target
-  // Location.search
+  // TO FIX
+  // location.search = params.toString();
   fillDrills();
 }
 
@@ -109,8 +71,8 @@ function fillInputsByValuesFromUrl() {
   const params = new URLSearchParams(location.search);
   const min = getNumValueFromInput(params.get('min')) ?? MIN;
   const max = getNumValueFromInput(params.get('max')) ?? MAX;
-  const perPageFromUrl = getNumValueFromInput(params.get('per-page')) ?? PER_PAGE;
-  const perPage = perPageFromUrl > 24 ? perPageFromUrl : PER_PAGE;
+  // const perPageFromUrl = getNumValueFromInput(params.get('per-page')) ?? PER_PAGE;
+  // const perPage = perPageFromUrl > 24 ? perPageFromUrl : PER_PAGE;
 
   minValueElement.value = min > max ? max : min;
   maxValueElement.value = min > max ? min : max;
@@ -120,7 +82,7 @@ function fillInputsByValuesFromUrl() {
   opDivElement.checked = getBooleanValueFromInput(params.get('div')) ?? true;
   randElement.checked = getBooleanValueFromInput(params.get('rand')) ?? true;
 
-  perPageElement.value = perPage;
+  // perPageElement.value = perPage;
 }
 
 function getNumValueFromInput(inputValue) {
@@ -131,6 +93,139 @@ function getNumValueFromInput(inputValue) {
 
 function getBooleanValueFromInput(inputValue) {
   if(['true','false'].includes(inputValue)) return inputValue === 'true';
+}
+
+function getAction(action, i, k) {
+  switch(action){
+    // Addition
+    case 'add':
+      if (opAddElement.checked === true){
+        return [`${i} + ${k}`];
+      }
+      break;
+    case 'sub':
+      // Substraction
+      if (opSubElement.checked === true) {
+        if (i >= k){
+          return [`${i} &minus; ${k}`];
+        }
+        // to keep the same quantity of exercises in all groups
+        else {
+          return [`${k + i} &minus; ${i}`];
+        }
+      }
+      break;
+     case 'mult':
+      // Multiplication
+      if (opMultElement.checked === true){
+        return [`${i} x ${k}`];
+      }
+      break;
+    case 'div':
+      // Division
+      if (opDivElement.checked === true) {
+        if(i >= k) {
+          return [`${k * i} &#247; ${i}`];
+        }
+        // to keep the same quantity of exercises in all groups
+        else {
+          return [`${k * i} &#247; ${k}`];
+        }
+      }
+      break;
+    default:
+      console.log('Unknown action ', action)
+  }
+}
+
+function getDrillsByNormalOrder(min, max, maxItems) {
+  const exercisesList = [];
+  const counters = {
+    add: 0,
+    sub: 0,
+    mult: 0,
+    div: 0,
+  };
+  const actions = Object.keys(counters);
+
+  for (let i = min; i <= max; i++) {
+    for (let k = min; k <= max; k++) {
+      actions.forEach(action => {
+        if (getAction(action, i, k)) {
+          exercisesList.push(...getAction(action, i, k));
+          counters[action]++;
+        };
+      })
+
+      if (exercisesList.length >= maxItems) {
+        break;
+      }
+    }
+
+    if (exercisesList.length >= maxItems) {
+      break;
+    }
+  }
+
+  console.log(counters)
+
+  return exercisesList;
+}
+
+function getDrillsByRandomOrder(min, max, maxItems) {
+  const exercisesByAction = {
+    add: [],
+    sub: [],
+    mult: [],
+    div: []
+  };
+  let itemsCounter = 0;
+  const actions = Object.keys(exercisesByAction);
+
+  for (let i = min; i <= max; i++) {
+    for (let k = min; k <= max; k++) {
+      actions.forEach(action => {
+        if (getAction(action, i, k)) {
+          exercisesByAction[action].push(...getAction(action, i, k));
+          itemsCounter++;
+        };
+      });
+
+      if (itemsCounter >= maxItems) {
+        break;
+      }
+    }
+
+    if (itemsCounter >= maxItems) {
+      break;
+    }
+  }
+
+  const counters = {};
+  Object.keys(exercisesByAction).forEach(key => counters[key] = exercisesByAction[key].length);
+
+  console.log(counters)
+
+  return mergeSets(exercisesByAction);
+}
+
+function mergeSets(exercisesSetsByAction) {
+  const mergedExercisesList = [];
+  const itemsMaxLength = Math.max(...(Object.values(exercisesSetsByAction).map(set => set.length)));
+  let currentIndex = 0;
+  const exercisesGroupsList = Object.keys(exercisesSetsByAction)
+    .map(key => {
+    const list = exercisesSetsByAction[key];
+    return shuffle(list);
+  })
+  // keep actions order: + - * /
+  while (currentIndex < itemsMaxLength) {
+      const existingValues = exercisesGroupsList.map(list => list[currentIndex]).filter(Boolean);
+      mergedExercisesList.push(...existingValues)
+    currentIndex++;
+  }
+
+  return mergedExercisesList
 }
 
 // https://stackoverflow.com/a/2450976
