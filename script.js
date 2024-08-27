@@ -7,6 +7,7 @@ const opMultElement = document.getElementById('mult');
 const opDivElement = document.getElementById('div');
 const perPageElement = document.getElementById('per-page');
 const randElement = document.getElementById('rand');
+const statsElement = document.getElementById('stats');
 
 const MIN = 1;
 const MAX = 12;
@@ -26,7 +27,6 @@ perPageElement.addEventListener('change', onChange);
 randElement.addEventListener('change', onChange);
 
 function fillDrills() {
-  console.log('--- Drills ---')
   const min = getNumValueFromInput(minValueElement.value) || MIN;
   const max = getNumValueFromInput(maxValueElement.value) || MAX;
   const perPageValue = getNumValueFromInput(perPageElement?.value) || PER_PAGE;
@@ -43,7 +43,8 @@ function fillDrills() {
     listsByPages.push(listItems.splice(0, perPageValue));
   }
 
-  console.log({isRandom, drills: drillsList.length, maxItems, pages: listsByPages.length})
+  const pages = drillsList.length ? `, pages: ${listsByPages.length}` : '';
+  statsElement.innerHTML = `Items: ${drillsList.length}${pages}`;
 
   drillsElement.style = `--rows: ${perPageValue / 3}`;
   drillsElement.innerHTML = '';
@@ -171,8 +172,6 @@ function getDrillsByNormalOrder(min, max, maxItems) {
     }
   }
 
-  console.log(counters)
-
   return exercisesList;
 }
 
@@ -207,8 +206,6 @@ function getDrillsByRandomOrder(min, max, maxItems) {
 
   const counters = {};
   Object.keys(exercisesByAction).forEach(key => counters[key] = exercisesByAction[key].length);
-
-  console.log(counters)
 
   return mergeSets(exercisesByAction);
 }

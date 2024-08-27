@@ -1,9 +1,18 @@
+HTML {
+  font-size: 18px;
+}
+
 BODY {
   margin: 0;
   padding: 0 40px;
   font-family: Helvetica, Tahoma, sans-serif;
-  font-size: 20px;
   line-height: 1.6;
+}
+
+@media (max-width: 700px) {
+  BODY {
+    padding: 0 20px;
+  }
 }
 
 H1 {
@@ -19,6 +28,7 @@ OL {
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(var(--rows), 1fr);
   grid-auto-flow: column;
+  font-size: 20px;
 }
 
 LI {
@@ -76,4 +86,9 @@ LABEL {
   display: flex;
   flex-wrap: wrap;
   gap: .5em 1.5em;
+}
+
+.stats {
+  margin-top: 1rem;
+  color: #777;
 }
