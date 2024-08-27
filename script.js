@@ -11,6 +11,7 @@ const randElement = document.getElementById('rand');
 const MIN = 1;
 const MAX = 12;
 const MAX_PAGES = 500;
+const PER_PAGE = 54;
 
 fillInputsByValuesFromUrl();
 fillDrills();
@@ -62,8 +63,11 @@ function onChange(event) {
   else {
     params.set(id, value)
   }
-  // TO FIX
-  // location.search = params.toString();
+
+  const paramsString = params.size > 0 ? `?${params.toString()}` : '';
+  const url = location.origin + location.pathname + paramsString;
+
+  history.pushState({}, '', url)
   fillDrills();
 }
 
@@ -71,8 +75,8 @@ function fillInputsByValuesFromUrl() {
   const params = new URLSearchParams(location.search);
   const min = getNumValueFromInput(params.get('min')) ?? MIN;
   const max = getNumValueFromInput(params.get('max')) ?? MAX;
-  // const perPageFromUrl = getNumValueFromInput(params.get('per-page')) ?? PER_PAGE;
-  // const perPage = perPageFromUrl > 24 ? perPageFromUrl : PER_PAGE;
+  const perPageFromUrl = getNumValueFromInput(params.get('per-page')) ?? PER_PAGE;
+  const perPage = perPageFromUrl > 24 ? perPageFromUrl : PER_PAGE;
 
   minValueElement.value = min > max ? max : min;
   maxValueElement.value = min > max ? min : max;
@@ -82,7 +86,7 @@ function fillInputsByValuesFromUrl() {
   opDivElement.checked = getBooleanValueFromInput(params.get('div')) ?? true;
   randElement.checked = getBooleanValueFromInput(params.get('rand')) ?? true;
 
-  // perPageElement.value = perPage;
+  perPageElement.value = perPage;
 }
 
 function getNumValueFromInput(inputValue) {
