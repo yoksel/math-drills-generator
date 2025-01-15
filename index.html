@@ -14,11 +14,19 @@
     content="Math drills sheets for free! Create your own math drill sheets!" />
   <meta name="twitter:card" property="twitter:card" content="summary" />
   <link rel="stylesheet" href="./styles.css"/>
+  <style>
+    @page {
+      size: A4;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <header class="header">
-      <h1>Math Drills Generator</h1>
+      <div class="header__container">
+        <h1>Math Drills Generator</h1>
+        <a href="./times-tables/">Times tables</a>
+        </div>
       <div class="controls">
         <div class="controls__group">
           <label>Min: <input type="number" id="min"></label>

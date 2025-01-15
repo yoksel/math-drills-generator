@@ -46,12 +46,41 @@ OL:after {
   background-size: 20px 20px;
 }
 
+.times-tables-list {
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 16px;
+  gap: 2em 1em;
+  padding-bottom: 0;
+}
+
+.times-tables-list:after {
+  content: none;
+}
+
 LI {
   display: flex;
   align-items: center;
   background-image: linear-gradient(to top, #CCC 1px, transparent 1px,transparent);
   background-size: 100% 100%;
   min-height: 50px;
+}
+
+.times-tables-list LI {
+  min-height: auto;
+  background: none;
+  flex-basis: calc((100% - 5rem)/var(--cols, 6))
+}
+
+.times-table {
+  padding: 0;
+  margin: 0;
+}
+
+.times-table LI {
+  display: list-item;
+  list-style: none;
+  background: none;
 }
 
 LABEL {
@@ -62,8 +91,10 @@ LABEL {
   margin-bottom: 30px;
 }
 
-@page {
-  size: A4;
+.header__container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 @media print {
