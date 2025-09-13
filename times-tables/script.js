@@ -1,5 +1,6 @@
 const drillsElement = document.getElementById( 'drills' );
 const randElement = document.getElementById('rand');
+const repeatElement = document.getElementById('repeat');
 
 const tableNumElements = document.getElementsByName('tables');
 const statsElement = document.getElementById('stats');
@@ -15,10 +16,12 @@ const PER_PAGE = 54;
 fillDrills();
 
 randElement.addEventListener('change', onChange);
+repeatElement.addEventListener('change', onChange);
 tableNumElements.forEach(tableNumElement => tableNumElement.addEventListener('change', onChange))
 
 function fillDrills() {
   const isRandom = randElement.checked;
+  const isRepeat = repeatElement.checked;
   const tablesValues = Array.from(tableNumElements).filter(({checked}) => checked).map(item => item.value )
 
   const drillsList = getTimesTablesList({tablesValues, isRandom});
@@ -28,6 +31,10 @@ function fillDrills() {
   // drillsElement.style = `--cols: ${Math.round(listItems.length / 2)}`;
   drillsElement.innerHTML = '';
   drillsElement.insertAdjacentHTML( 'beforeend', `<ol class="times-tables-list">${listItems.join('')}</ol>` )
+
+  if(isRepeat) {
+    drillsElement.insertAdjacentHTML( 'beforeend', `<ol class="times-tables-list">${listItems.join('')}</ol>` )
+  }
 }
 
 // UTILS
@@ -69,6 +76,8 @@ function getTimesTablesList({tablesValues, isRandom}) {
     const list = [];
 
     for(let i = 1; i <= 12; i++) {
+      if(randElement.checked && i === 1) continue;
+
       list.push(`<li>${i < 10 ? '&nbsp;&nbsp;': ''}${i} x ${item} = ___</li>`)
     }
     const orderedList = isRandom ? shuffle(list) : list;

@@ -50,11 +50,15 @@ OL:after {
   display: flex;
   flex-wrap: wrap;
   font-size: 16px;
-  gap: 2em 1em;
-  padding-bottom: 0;
+  gap: 1em;
 }
 
-.times-tables-list:after {
+.times-tables-list:only-child {
+  padding-bottom: 0;
+  gap: 2em 1em;
+}
+.times-tables-list:only-child:after {
+  padding-bottom: 0;
   content: none;
 }
 
@@ -111,6 +115,15 @@ LABEL {
     max-height: 100%;
     page-break-after: always;
     padding-bottom: 0;
+  }
+
+  .times-tables-list {
+    page-break-after: auto;
+    margin-bottom: 2rem;
+  }
+
+  .times-tables-list:only-child {
+    margin-bottom: 0;
   }
 
   OL:after {
