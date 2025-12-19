@@ -8,11 +8,27 @@ const opDivElement = document.getElementById('div');
 const perPageElement = document.getElementById('per-page');
 const randElement = document.getElementById('rand');
 const statsElement = document.getElementById('stats');
+const inverseElement = document.getElementById('inverse');
 
 const MIN = 1;
 const MAX = 12;
 const MAX_PAGES = 500;
 const PER_PAGE = 54;
+const UNDERSCORE = '__';
+
+const perPageOptions = [
+  24,
+  36,
+  48,
+  54,
+  60,
+  72,
+];
+
+const perPageOptionsForInverse = [
+  30,
+  45,
+];
 
 fillInputsByValuesFromUrl();
 fillDrills();
@@ -25,16 +41,21 @@ opMultElement.addEventListener('input', onChange);
 opDivElement.addEventListener('input', onChange);
 perPageElement.addEventListener('change', onChange);
 randElement.addEventListener('change', onChange);
+inverseElement.addEventListener('change', onChange);
 
 function fillDrills() {
   const min = getNumValueFromInput(minValueElement.value) || MIN;
   const max = getNumValueFromInput(maxValueElement.value) || MAX;
   const perPageValue = getNumValueFromInput(perPageElement?.value) || PER_PAGE;
   const isRandom = randElement.checked;
+  const isInverse = inverseElement.checked;
   const maxItems = perPageValue * MAX_PAGES;
 
-  const drillsList = isRandom ? getDrillsByRandomOrder(min, max, maxItems) : getDrillsByNormalOrder(min, max, maxItems);
-  const listItems = drillsList.map(item => `<li>${item} = </li>`);
+  const drillsList = isRandom ? getDrillsByRandomOrder(min, max, maxItems, isInverse) : getDrillsByNormalOrder(min, max, maxItems, isInverse);
+  const checkField = isInverse ? '<div class="check-field">Check:</div>' : '';
+  const listItems = drillsList.map(item => {
+    return `<li>${item} ${checkField}</li>`
+  });
 
   const listsByPages = [listItems.splice(0, perPageValue)];
 
@@ -69,15 +90,33 @@ function onChange(event) {
   const url = location.origin + location.pathname + paramsString;
 
   history.pushState({}, '', url)
+
+  setPerPageSelect(params);
+
   fillDrills();
+}
+
+function setPerPageSelect(params) {
+  const isInverse = inverseElement.checked;
+  const perPageFromUrl = getNumValueFromInput(params.get('per-page')) ?? PER_PAGE;
+  const perPage = perPageFromUrl > 24 ? perPageFromUrl : PER_PAGE;
+
+  if(perPageElement.options.length > 0) {
+    while (perPageElement.options.length > 0) {
+      perPageElement.remove(0);
+    }
+  }
+
+  const perPageOptionsElements = (isInverse ? perPageOptionsForInverse : perPageOptions).map(item => `<option value="${item}">${item}</option>`);
+
+  perPageElement.insertAdjacentHTML( 'beforeend', perPageOptionsElements.join('') )
+  perPageElement.value = perPage;
 }
 
 function fillInputsByValuesFromUrl() {
   const params = new URLSearchParams(location.search);
   const min = getNumValueFromInput(params.get('min')) ?? MIN;
   const max = getNumValueFromInput(params.get('max')) ?? MAX;
-  const perPageFromUrl = getNumValueFromInput(params.get('per-page')) ?? PER_PAGE;
-  const perPage = perPageFromUrl > 24 ? perPageFromUrl : PER_PAGE;
 
   minValueElement.value = min > max ? max : min;
   maxValueElement.value = min > max ? min : max;
@@ -86,8 +125,9 @@ function fillInputsByValuesFromUrl() {
   opMultElement.checked = getBooleanValueFromInput(params.get('mult')) ?? true;
   opDivElement.checked = getBooleanValueFromInput(params.get('div')) ?? true;
   randElement.checked = getBooleanValueFromInput(params.get('rand')) ?? true;
+  inverseElement.checked = getBooleanValueFromInput(params.get('inverse')) ?? false;
 
-  perPageElement.value = perPage;
+  setPerPageSelect(params);
 }
 
 function getNumValueFromInput(inputValue) {
@@ -100,41 +140,73 @@ function getBooleanValueFromInput(inputValue) {
   if(['true','false'].includes(inputValue)) return inputValue === 'true';
 }
 
-function getAction(action, i, k) {
+function getAddition(i, k, isInverse) {
+  if(isInverse) {
+    return `${i} + ${UNDERSCORE} = ${i + k}`;
+  }
+
+  return `${i} + ${k} = `;
+}
+
+function getSubtraction(i, k, isInverse) {
+  if(isInverse) {
+    return `${i} &minus; ${UNDERSCORE} = ${i - k}`;
+  }
+
+  return `${i} &minus; ${k} = `;
+}
+
+function getMultiplication(i, k, isInverse) {
+  if(isInverse) {
+    return `${i} x ${UNDERSCORE} = ${i * k}`;
+  }
+
+  return `${i} x ${k} = `;
+}
+
+function getDivision(i, k, isInverse) {
+  if(isInverse) {
+    return `${i} &#247; ${UNDERSCORE} = ${i / k}`;
+  }
+
+  return `${i} &#247; ${i} = `;
+}
+
+function getAction(action, i, k, isInverse) {
   switch(action){
     // Addition
     case 'add':
       if (opAddElement.checked === true){
-        return [`${i} + ${k}`];
+        return getAddition(i, k, isInverse);
       }
       break;
     case 'sub':
-      // Substraction
+      // Subtraction
       if (opSubElement.checked === true) {
         if (i >= k){
-          return [`${i} &minus; ${k}`];
+          return getSubtraction(i, k, isInverse);
         }
         // to keep the same quantity of exercises in all groups
         else {
-          return [`${k + i} &minus; ${i}`];
+          return getSubtraction(k + i, i, isInverse);
         }
       }
       break;
      case 'mult':
       // Multiplication
       if (opMultElement.checked === true){
-        return [`${i} x ${k}`];
+        return getMultiplication(i, k, isInverse);
       }
       break;
     case 'div':
       // Division
       if (opDivElement.checked === true) {
         if(i >= k) {
-          return [`${k * i} &#247; ${i}`];
+          return getDivision(k * i, i, isInverse);
         }
         // to keep the same quantity of exercises in all groups
         else {
-          return [`${k * i} &#247; ${k}`];
+          return getDivision(k * i, k, isInverse);
         }
       }
       break;
@@ -143,7 +215,7 @@ function getAction(action, i, k) {
   }
 }
 
-function getDrillsByNormalOrder(min, max, maxItems) {
+function getDrillsByNormalOrder(min, max, maxItems, isInverse) {
   const exercisesList = [];
   const counters = {
     add: 0,
@@ -156,8 +228,8 @@ function getDrillsByNormalOrder(min, max, maxItems) {
   for (let i = min; i <= max; i++) {
     for (let k = min; k <= max; k++) {
       actions.forEach(action => {
-        if (getAction(action, i, k)) {
-          exercisesList.push(...getAction(action, i, k));
+        if (getAction(action, i, k, isInverse)) {
+          exercisesList.push(getAction(action, i, k, isInverse));
           counters[action]++;
         };
       })
@@ -175,7 +247,7 @@ function getDrillsByNormalOrder(min, max, maxItems) {
   return exercisesList;
 }
 
-function getDrillsByRandomOrder(min, max, maxItems) {
+function getDrillsByRandomOrder(min, max, maxItems, isInverse) {
   const exercisesByAction = {
     add: [],
     sub: [],
@@ -188,8 +260,8 @@ function getDrillsByRandomOrder(min, max, maxItems) {
   for (let i = min; i <= max; i++) {
     for (let k = min; k <= max; k++) {
       actions.forEach(action => {
-        if (getAction(action, i, k)) {
-          exercisesByAction[action].push(...getAction(action, i, k));
+        if (getAction(action, i, k, isInverse)) {
+          exercisesByAction[action].push(getAction(action, i, k, isInverse));
           itemsCounter++;
         };
       });
