@@ -13,8 +13,10 @@ const inverseElement = document.getElementById('inverse');
 const MIN = 1;
 const MAX = 12;
 const MAX_PAGES = 500;
-const PER_PAGE = 54;
 const UNDERSCORE = '__';
+
+const PER_PAGE = 54;
+const INVERSE_PER_PAGE = 30;
 
 const perPageOptions = [
   24,
@@ -79,11 +81,19 @@ function fillDrills() {
 function onChange(event) {
   const {id, value, type, checked} = event.target;
   const params = new URLSearchParams(location.search);
+
   if(type === 'checkbox'){
     params.set(id, checked)
   }
   else {
     params.set(id, value)
+  }
+
+  // Adjust per page value when inverse is on
+  if(id === 'inverse') {
+    const defaultByInverse = getPerPageDefaultValue();
+    perPageElement.value = defaultByInverse;
+    params.set('per-page', defaultByInverse)
   }
 
   const paramsString = params.size > 0 ? `?${params.toString()}` : '';
@@ -96,10 +106,17 @@ function onChange(event) {
   fillDrills();
 }
 
+function getPerPageDefaultValue() {
+  const isInverse = inverseElement.checked;
+
+  return isInverse ? INVERSE_PER_PAGE : PER_PAGE
+}
+
 function setPerPageSelect(params) {
   const isInverse = inverseElement.checked;
-  const perPageFromUrl = getNumValueFromInput(params.get('per-page')) ?? PER_PAGE;
-  const perPage = perPageFromUrl > 24 ? perPageFromUrl : PER_PAGE;
+  const valueFromInput = getNumValueFromInput(params.get('per-page'));
+  const perPageFromUrl = valueFromInput ? valueFromInput : getPerPageDefaultValue();
+  const perPage = perPageFromUrl > 24 ? perPageFromUrl : getPerPageDefaultValue();
 
   if(perPageElement.options.length > 0) {
     while (perPageElement.options.length > 0) {
