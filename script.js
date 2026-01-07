@@ -54,7 +54,7 @@ function fillDrills() {
   const maxItems = perPageValue * MAX_PAGES;
 
   const drillsList = isRandom ? getDrillsByRandomOrder(min, max, maxItems, isInverse) : getDrillsByNormalOrder(min, max, maxItems, isInverse);
-  const checkField = isInverse ? '<div class="check-field">Check:</div>' : '';
+  const checkField = isInverse ? '<div class="check-field">Check: _________________</div>' : '';
   const listItems = drillsList.map(item => {
     return `<li>${item} ${checkField}</li>`
   });
