@@ -186,7 +186,7 @@ function getDivision(i, k, isInverse) {
     return `${i} &#247; ${UNDERSCORE} = ${i / k}`;
   }
 
-  return `${i} &#247; ${i} = `;
+  return `${i} &#247; ${k} = `;
 }
 
 function getAction(action, i, k, isInverse) {
